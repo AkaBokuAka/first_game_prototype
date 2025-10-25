@@ -1,20 +1,4 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>入職通知信 - 文件審核部</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
-  <script src="email.js" defer></script>
-</head>
-<body>
-<header>
-  <div>📧 公司系統</div>
-  <form onsubmit="handleSearch(event)">
-    <input id="searchInput" type="text" placeholder="輸入關鍵詞跳轉...">
-  </form>
-</header>
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -22,6 +6,8 @@
   <title>邮件客户端</title>
   <!-- 引入Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="script.js"></script>
+
   <!-- 引入Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   
@@ -80,23 +66,25 @@
 <body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
   <!-- 顶部导航栏 -->
   <header class="bg-white border-b border-neutral-200 py-3 px-4 md:px-6 sticky top-0 z-30">
-
+    <div class="flex items-center justify-between">
+      <!-- 左侧Logo和菜单按钮 -->
+      <div class="flex items-center gap-4">
+        <button id="menu-toggle" class="md:hidden text-neutral-600 hover:text-primary transition-colors">
+          <i class="fa fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center gap-2">
+          <i class="fa fa-envelope text-primary text-2xl"></i>
+          <h1 class="text-xl font-bold text-neutral-700 hidden sm:block">邮件客户端</h1>
+        </div>
+      </div>
       
-    <!-- 搜索欄 -->
-    <div class="container">        
-        <form class="search-form" onsubmit="handleSearch(event)">
-            <div class="search-container">
-                <input id="searchInput" type="text" placeholder="輸入關鍵詞跳轉...">
-                <button type="submit" class="search-btn">搜索</button>
-            </div>
+      <!-- 右侧工具栏 -->
+      <div class="flex items-center gap-3 md:gap-5">
+        <form onsubmit="handleSearch(event)">
+          <input id="searchInput" type="text" placeholder="輸入關鍵詞跳轉...">
         </form>
-        
-        <p class="description">
-            在桌面设备上，搜索栏宽度约为屏幕的三分之一并居中显示。<br>
-            在移动设备上，搜索栏将占据屏幕的完整宽度。
-        </p>
-    </div>  
-  
+      </div>
+    </div>
   </header>
 
   <div class="flex flex-1 overflow-hidden">
@@ -191,6 +179,14 @@
         
         <div class="text-sm text-neutral-500">
           1-20 封，共 128 封
+        </div>
+      </div>
+      
+      <!-- 邮件搜索栏 -->
+      <div class="bg-white border-b border-neutral-200 py-3 px-4 md:px-6">
+        <div class="relative">
+          <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+          <input type="text" placeholder="搜索邮件..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
         </div>
       </div>
       
@@ -491,8 +487,5 @@
       </div>
     </div>
   </div>
-
 </body>
 </html>
-
-
