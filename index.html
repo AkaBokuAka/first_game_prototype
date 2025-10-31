@@ -1,591 +1,506 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邮件客户端</title>
-  <!-- 引入Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="script.js"></script>
-  <script src="email.js"></script>
-
-  <!-- 引入Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  
-  <!-- Tailwind配置 -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#165DFF',
-            secondary: '#4080FF',
-            neutral: {
-              100: '#F5F7FA',
-              200: '#E5E6EB',
-              300: '#C9CDD4',
-              400: '#86909C',
-              500: '#4E5969',
-              600: '#272E3B',
-              700: '#1D2129',
-            }
-          },
-          fontFamily: {
-            inter: ['Inter', 'system-ui', 'sans-serif'],
-          },
-        },
-      }
-    }
-  </script>
-  
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .mail-hover {
-        @apply transition-all duration-200 hover:bg-neutral-100;
-      }
-      .sidebar-item {
-        @apply flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 cursor-pointer;
-      }
-      .sidebar-item.active {
-        @apply bg-primary/10 text-primary font-medium;
-      }
-      .sidebar-item:not(.active) {
-        @apply hover:bg-neutral-100 text-neutral-600;
-      }
-      .btn-primary {
-        @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium;
-      }
-      .btn-secondary {
-        @apply bg-white text-neutral-700 border border-neutral-200 px-4 py-2 rounded-lg hover:bg-neutral-50 transition-all duration-200 font-medium;
-      }
-    }
-  </style>
-</head>
-<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
-  <!-- 顶部导航栏 -->
-  <header class="bg-white border-b border-neutral-200 py-3 px-4 md:px-6 sticky top-0 z-30">
-    <div class="flex items-center justify-between">
-      <!-- 左侧Logo和菜单按钮 -->
-      <div class="flex items-center gap-4">
-        <button id="menu-toggle" class="md:hidden text-neutral-600 hover:text-primary transition-colors">
-          <i class="fa fa-bars text-xl"></i>
-        </button>
-        <div class="flex items-center gap-2">
-          <i class="fa fa-envelope text-primary text-2xl"></i>
-          <h1 class="text-xl font-bold text-neutral-700 hidden sm:block">邮件客户端</h1>
-        </div>
-      </div>
-      
-      <!-- 右侧工具栏 -->
-      <div class="flex items-center gap-3 md:gap-5">
-        <form onsubmit="handleSearch(event)">
-          <input id="searchInput" type="text" placeholder="輸入關鍵詞跳轉...">
-        </form>
-      </div>
-    </div>
-  </header>
-
-  <div class="flex flex-1 overflow-hidden">
-    <!-- 侧边栏 -->
-    <aside id="sidebar" class="bg-white w-64 border-r border-neutral-200 flex-shrink-0 hidden md:block transition-all duration-300 ease-in-out z-20 overflow-y-auto">
-      <div class="p-4">
-        <button class="w-full flex items-center gap-3 bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium">
-          <i class="fa fa-pencil"></i>
-          <span>写邮件</span>
-        </button>
-      </div>
-      
-      <nav class="px-2 py-1">
-        <p class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">主要功能</p>
-        <div class="sidebar-item active">
-          <i class="fa fa-inbox w-5 text-center"></i>
-          <span>收件箱</span>
-          <span class="ml-auto bg-neutral-200 text-neutral-600 text-xs px-2 py-0.5 rounded-full">12</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-star w-5 text-center"></i>
-          <span>已加星标</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-paper-plane w-5 text-center"></i>
-          <span>已发送</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-draft w-5 text-center"></i>
-          <span>草稿</span>
-          <span class="ml-auto bg-neutral-200 text-neutral-600 text-xs px-2 py-0.5 rounded-full">3</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-trash w-5 text-center"></i>
-          <span>回收站</span>
-        </div>
-      </nav>
-      
-      <nav class="px-2 py-1 mt-4">
-        <p class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">分类</p>
-        <div class="sidebar-item">
-          <i class="fa fa-tag w-5 text-center" style="color: #4CAF50;"></i>
-          <span>工作</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-tag w-5 text-center" style="color: #2196F3;"></i>
-          <span>个人</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-tag w-5 text-center" style="color: #FF9800;"></i>
-          <span>推广</span>
-        </div>
-        <div class="sidebar-item">
-          <i class="fa fa-plus w-5 text-center"></i>
-          <span>添加分类</span>
-        </div>
-      </nav>
-      
-      <div class="mt-6 px-4">
-        <div class="bg-primary/5 rounded-xl p-4">
-          <h3 class="font-medium text-neutral-700 mb-2">升级到高级版</h3>
-          <p class="text-sm text-neutral-500 mb-3">获取更多存储空间和高级功能</p>
-          <button class="w-full text-primary text-sm font-medium py-2 border border-primary rounded-lg hover:bg-primary/10 transition-colors">
-            了解详情
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- 主内容区 -->
-    <main class="flex-1 flex flex-col overflow-hidden">
-      <!-- 邮件列表工具栏 -->
-      <div class="bg-white border-b border-neutral-200 py-2 px-4 md:px-6 flex items-center justify-between">
-        <div class="flex items-center gap-2 md:gap-4">
-          <button class="p-2 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded transition-colors">
-            <i class="fa fa-check-square-o"></i>
-          </button>
-          <button class="p-2 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded transition-colors hidden sm:block">
-            <i class="fa fa-trash"></i>
-          </button>
-          <button class="p-2 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded transition-colors hidden sm:block">
-            <i class="fa fa-star-o"></i>
-          </button>
-          <div class="h-4 border-r border-neutral-200 hidden sm:block"></div>
-          <button class="p-2 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded transition-colors text-sm">
-            <i class="fa fa-chevron-left"></i>
-          </button>
-          <button class="p-2 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded transition-colors text-sm">
-            <i class="fa fa-chevron-right"></i>
-          </button>
-        </div>
-        
-        <div class="text-sm text-neutral-500">
-          1-20 封，共 128 封
-        </div>
-      </div>
-      
-      <!-- 邮件搜索栏 -->
-      <div class="bg-white border-b border-neutral-200 py-3 px-4 md:px-6">
-        <div class="relative">
-          <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
-          <input type="text" placeholder="搜索邮件..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-        </div>
-      </div>
-      
-      <!-- 邮件列表 -->
-      <div class="flex-1 overflow-y-auto bg-white">
-        <!-- 邮件项 - 未读 -->
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="1">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star-o text-neutral-400 hover:text-yellow-400 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="font-semibold text-neutral-800 truncate">产品团队</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">今天 09:42</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="font-medium text-neutral-800 truncate">关于新版本功能的更新通知</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">我们很高兴地宣布，最新版本的产品已经发布，包含多项重要更新...</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 邮件项 - 已读 -->
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="2">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star-o text-neutral-400 hover:text-yellow-400 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">人力资源部</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">昨天 15:30</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">关于下周员工培训的安排</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">下周三将举行新员工入职培训，请相关部门安排好工作...</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 邮件项 - 带附件 -->
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="3">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star text-yellow-400 hover:text-yellow-500 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">财务部门</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">昨天 10:15</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">
-                关于上个月的财务报表
-                <i class="fa fa-paperclip text-neutral-400 ml-1"></i>
-              </p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">请查收上个月的财务报表，如有疑问请及时与我们联系...</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 更多邮件项 -->
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="4">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star-o text-neutral-400 hover:text-yellow-400 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">市场部</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">06月12日</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">第二季度市场推广计划</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">附件是第二季度的市场推广计划，请各位查阅并提供反馈...</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="5">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star-o text-neutral-400 hover:text-yellow-400 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">技术支持</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">06月10日</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">关于您提交的技术问题的回复</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">您好，关于您提交的系统错误问题，我们已经修复，请测试...</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="6">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star-o text-neutral-400 hover:text-yellow-400 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">王小明</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">06月08日</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">关于项目进度的讨论</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">上次会议讨论的项目进度，我整理了一份文档，请看一下...</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mail-hover border-b border-neutral-100 p-4 md:p-5 flex items-start cursor-pointer bg-white" data-id="7">
-          <div class="flex-shrink-0 mr-3">
-            <input type="checkbox" class="mt-1">
-          </div>
-          <div class="flex-shrink-0 mr-3">
-            <i class="fa fa-star text-yellow-400 hover:text-yellow-500 transition-colors"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <h3 class="text-neutral-600 truncate">系统通知</h3>
-              <span class="text-sm text-neutral-500 whitespace-nowrap">06月05日</span>
-            </div>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-              <p class="text-neutral-700 truncate">账户安全验证提醒</p>
-              <p class="text-neutral-500 text-sm truncate hidden sm:block">为了保障您的账户安全，请尽快完成安全验证，开启双重认证...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>郵件客戶端</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     
-    <!-- 邮件详情面板 -->
-    <section id="email-detail" class="hidden lg:block w-96 xl:w-[500px] bg-white border-l border-neutral-200 flex-shrink-0 flex flex-col overflow-hidden z-10">
-      <!-- 邮件详情头部 -->
-      <div class="p-4 md:p-6 border-b border-neutral-200 flex justify-between items-start">
-        <h2 class="text-lg font-semibold text-neutral-800">关于新版本功能的更新通知</h2>
-        <button id="close-detail" class="text-neutral-500 hover:text-neutral-700 p-1">
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      
-      <!-- 邮件发件人信息 -->
-      <div class="p-4 md:p-6 border-b border-neutral-200">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <img src="https://picsum.photos/id/20/200/200" alt="发件人头像" class="w-10 h-10 rounded-full object-cover">
-            <div>
-              <h3 class="font-medium text-neutral-800">产品团队</h3>
-              <p class="text-sm text-neutral-500">product@example.com</p>
-            </div>
-          </div>
-          <span class="text-sm text-neutral-500">今天 09:42</span>
-        </div>
-        
-        <div class="flex items-center gap-4 text-sm">
-          <button class="text-neutral-600 hover:text-primary transition-colors">
-            <i class="fa fa-reply mr-1"></i> 回复
-          </button>
-          <button class="text-neutral-600 hover:text-primary transition-colors">
-            <i class="fa fa-forward mr-1"></i> 转发
-          </button>
-          <button class="text-neutral-600 hover:text-primary transition-colors">
-            <i class="fa fa-trash mr-1"></i> 删除
-          </button>
-        </div>
-      </div>
-      
-      <!-- 邮件内容 -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-6">
-        <p class="mb-4">尊敬的用户：</p>
-        
-        <p class="mb-4">我们很高兴地宣布，最新版本的产品已经发布，包含多项重要更新和优化，旨在为您提供更好的使用体验。</p>
-        
-        <p class="mb-4">本次更新主要包括：</p>
-        
-        <ul class="list-disc pl-5 mb-4 space-y-2">
-          <li>全新的用户界面设计，更加简洁直观</li>
-          <li>优化了邮件搜索功能，搜索速度提升30%</li>
-          <li>新增邮件分类标签功能，方便您更好地管理邮件</li>
-          <li>增强了移动设备适配性，提升移动端使用体验</li>
-          <li>修复了已知的bug，提高了系统稳定性</li>
-        </ul>
-        
-        <p class="mb-4">您可以在设置中查看完整的更新日志。如果您在使用过程中有任何问题或建议，欢迎随时联系我们的客服团队。</p>
-        
-        <p>感谢您的支持与使用！</p>
-        
-        <p class="mt-4">产品团队</p>
-        <p class="text-neutral-500 text-sm">2023年6月15日</p>
-        
-        <!-- 附件 -->
-        <div class="mt-8 pt-6 border-t border-neutral-200">
-          <h3 class="font-medium text-neutral-700 mb-4">附件 (2)</h3>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-              <i class="fa fa-file-pdf-o text-red-500 text-xl"></i>
-              <div class="flex-1 min-w-0">
-                <p class="text-neutral-800 truncate">更新日志.pdf</p>
-                <p class="text-xs text-neutral-500">2.4 MB</p>
-              </div>
-              <button class="text-primary hover:text-primary/80">
-                <i class="fa fa-download"></i>
-              </button>
+    <!-- 配置Tailwind顏色和字體 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#6B7280',
+                        accent: '#3B82F6',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        light: '#F3F4F6',
+                        dark: '#1F2937'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .mail-hover {
+                @apply transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800;
+            }
+            .sidebar-item {
+                @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer;
+            }
+            .sidebar-item-active {
+                @apply bg-primary/10 text-primary font-medium;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all duration-200;
+            }
+            .btn-outline {
+                @apply border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg transition-all duration-200;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
+    <!-- 頂部導航欄 -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm z-10 sticky top-0">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- 品牌標識 -->
+            <div class="flex items-center gap-2">
+                <button id="sidebar-toggle" class="lg:hidden text-gray-600 dark:text-gray-300 p-2">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-envelope text-primary text-2xl"></i>
+                    <h1 class="text-xl font-bold hidden sm:block">郵件客戶端</h1>
+                </div>
             </div>
             
-            <div class="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-              <i class="fa fa-file-image-o text-green-500 text-xl"></i>
-              <div class="flex-1 min-w-0">
-                <p class="text-neutral-800 truncate">新功能截图.png</p>
-                <p class="text-xs text-neutral-500">1.8 MB</p>
-              </div>
-              <button class="text-primary hover:text-primary/80">
-                <i class="fa fa-download"></i>
-              </button>
+            <!-- 搜索欄 -->
+            <div class="hidden md:block relative flex-1 max-w-xl mx-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fa fa-search text-gray-400"></i>
+                    </span>
+                    <input type="text" placeholder="搜索郵件..." 
+                        class="w-full py-2 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 
+                               focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                </div>
             </div>
-          </div>
+            
+            <!-- 簡化的右側按鈕 -->
+            <div class="flex items-center gap-3">
+                <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative">
+                    <i class="fa fa-bell-o text-gray-600 dark:text-gray-300"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fa fa-cog text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
         </div>
-      </div>
-      
-      <!-- 回复框 -->
-      <div class="p-4 md:p-6 border-t border-neutral-200">
-        <button class="w-full flex items-center justify-center gap-2 btn-primary">
-          <i class="fa fa-reply"></i>
-          <span>回复邮件</span>
-        </button>
-      </div>
-    </section>
-  </div>
-  
-  <!-- 写邮件弹窗 -->
-  <div id="compose-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-      <!-- 弹窗头部 -->
-      <div class="p-4 border-b border-neutral-200 flex justify-between items-center">
-        <h3 class="font-semibold text-neutral-800">写邮件</h3>
-        <button id="close-compose" class="text-neutral-500 hover:text-neutral-700 p-1">
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      
-      <!-- 邮件表单 -->
-      <div class="flex-1 overflow-y-auto p-4">
-        <div class="mb-4">
-          <label class="block text-sm text-neutral-600 mb-1">收件人</label>
-          <input type="email" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="输入收件人邮箱地址">
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm text-neutral-600 mb-1">抄送</label>
-          <input type="email" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="输入抄送邮箱地址（可选）">
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm text-neutral-600 mb-1">主题</label>
-          <input type="text" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="邮件主题">
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm text-neutral-600 mb-1">内容</label>
-          <textarea rows="8" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入邮件内容..."></textarea>
-        </div>
-        
-        <!-- 附件区域 -->
-        <div class="mb-4">
-          <label class="block text-sm text-neutral-600 mb-2">附件</label>
-          <div class="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
-            <i class="fa fa-cloud-upload text-2xl text-neutral-400 mb-2"></i>
-            <p class="text-neutral-500">拖放文件到此处，或 <span class="text-primary">浏览文件</span></p>
-            <p class="text-xs text-neutral-400 mt-1">支持 PDF, Word, Excel, 图片等格式，最大50MB</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 弹窗底部 -->
-      <div class="p-4 border-t border-neutral-200 flex justify-end gap-3">
-        <button class="btn-secondary">
-          保存草稿
-        </button>
-        <button class="btn-primary">
-          发送邮件
-        </button>
-      </div>
-    </div>
-  </div>
-  <script>
-    // 侧边栏切换
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('hidden');
-      sidebar.classList.toggle('absolute');
-      sidebar.classList.toggle('inset-y-0');
-      sidebar.classList.toggle('left-0');
-      sidebar.classList.toggle('w-64');
-    });
-    
-    // 邮件项点击事件
-    const mailItems = document.querySelectorAll('[data-id]');
-    const emailDetail = document.getElementById('email-detail');
-    const closeDetail = document.getElementById('close-detail');
-    
-    mailItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        // 忽略复选框点击
-        if (e.target.type === 'checkbox' || e.target.parentElement.type === 'checkbox') {
-          return;
-        }
-        
-        // 在移动设备上显示详情
-        if (window.innerWidth < 1024) {
-          emailDetail.classList.remove('hidden');
-          emailDetail.classList.add('absolute', 'inset-0', 'w-full', 'z-40');
-        }
-      });
-    });
-    
-    closeDetail.addEventListener('click', () => {
-      if (window.innerWidth < 1024) {
-        emailDetail.classList.add('hidden');
-        emailDetail.classList.remove('absolute', 'inset-0', 'w-full', 'z-40');
-      }
-    });
-    
-    // 写邮件弹窗
-    const composeButtons = document.querySelectorAll('button:first-of-type');
-    const composeModal = document.getElementById('compose-modal');
-    const closeCompose = document.getElementById('close-compose');
-    
-    composeButtons[0].addEventListener('click', () => {
-      composeModal.classList.remove('hidden');
-      composeModal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-    });
-    
-    closeCompose.addEventListener('click', () => {
-      composeModal.classList.add('hidden');
-      composeModal.classList.remove('flex');
-      document.body.style.overflow = 'auto';
-    });
-    
-    // 点击弹窗外部关闭
-    composeModal.addEventListener('click', (e) => {
-      if (e.target === composeModal) {
-        composeModal.classList.add('hidden');
-        composeModal.classList.remove('flex');
-        document.body.style.overflow = 'auto';
-      }
-    });
-    
-    // 窗口大小变化时调整布局
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 1024) {
-        sidebar.classList.remove('hidden', 'absolute', 'inset-y-0', 'left-0', 'w-64');
-        sidebar.classList.add('block');
-        
-        emailDetail.classList.remove('hidden', 'absolute', 'inset-0', 'w-full', 'z-40');
-        emailDetail.classList.add('block');
-      } else {
-        sidebar.classList.add('hidden');
-        emailDetail.classList.add('hidden');
-      }
-    });
-    
-    // 星标切换功能
-    const starIcons = document.querySelectorAll('.fa-star, .fa-star-o');
-    starIcons.forEach(icon => {
-      icon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (icon.classList.contains('fa-star-o')) {
-          icon.classList.remove('fa-star-o', 'text-neutral-400');
-          icon.classList.add('fa-star', 'text-yellow-400');
-        } else {
-          icon.classList.remove('fa-star', 'text-yellow-400');
-          icon.classList.add('fa-star-o', 'text-neutral-400');
-        }
-      });
-    });
-  </script>
+    </header>
 
-  
+    <!-- 主內容區 -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 側邊欄 -->
+        <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 shadow-md 
+                                 flex-shrink-0 transform -translate-x-full lg:translate-x-0 
+                                 fixed lg:static h-[calc(100vh-64px)] lg:h-auto top-16 lg:top-0 
+                                 z-20 transition-transform duration-300 ease-in-out">
+            <div class="p-4">
+                <button class="btn-primary w-full flex items-center justify-center gap-2">
+                    <i class="fa fa-pencil"></i>
+                    <span>寫郵件</span>
+                </button>
+            </div>
+            
+            <nav class="p-2">
+                <p class="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    郵件文件夾
+                </p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="sidebar-item sidebar-item-active">
+                            <i class="fa fa-inbox w-5 text-center"></i>
+                            <span>收件箱</span>
+                            <span class="ml-auto bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">24</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fa fa-star-o w-5 text-center"></i>
+                            <span>已標星</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fa fa-paper-plane-o w-5 text-center"></i>
+                            <span>已發送</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fa fa-draft w-5 text-center"></i>
+                            <span>草稿</span>
+                            <span class="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-full">5</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fa fa-trash-o w-5 text-center"></i>
+                            <span>已刪除</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <p class="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-6 mb-2">
+                    標籤
+                </p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="w-3 h-3 rounded-full bg-success"></span>
+                            <span>工作</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="w-3 h-3 rounded-full bg-warning"></span>
+                            <span>個人</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="w-3 h-3 rounded-full bg-danger"></span>
+                            <span>緊急</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="w-3 h-3 rounded-full bg-accent"></span>
+                            <span>計劃</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- 遮罩層 - 在手機上顯示 -->
+        <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-10 lg:hidden hidden" 
+             onclick="toggleSidebar()"></div>
+        
+        <!-- 郵件列表和詳情區域 -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- 郵件列表 -->
+            <div id="mail-list-container" class="w-full md:w-96 lg:w-2/5 xl:w-1/3 
+                                                border-r border-gray-200 dark:border-gray-700 
+                                                flex-shrink-0 overflow-hidden flex flex-col">
+                <!-- 移動端搜索欄 -->
+                <div class="p-4 md:hidden border-b border-gray-200 dark:border-gray-700">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="fa fa-search text-gray-400"></i>
+                        </span>
+                        <input type="text" placeholder="搜索郵件..." 
+                            class="w-full py-2 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 
+                                   focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+                    </div>
+                </div>
+                
+                <!-- 郵件過濾器 -->
+                <div class="flex border-b border-gray-200 dark:border-gray-700">
+                    <button class="flex-1 py-3 text-center text-sm font-medium text-primary border-b-2 border-primary">
+                        全部
+                    </button>
+                    <button class="flex-1 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
+                        未讀
+                    </button>
+                    <button class="flex-1 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
+                        重要
+                    </button>
+                </div>
+                
+                <!-- 郵件列表 -->
+                <div id="mail-list" class="flex-1 overflow-y-auto">
+                    <!-- 郵件項目 - 未讀 -->
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer bg-white dark:bg-gray-800 font-medium" data-id="1">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm font-semibold truncate">市場部 - 新產品發布會邀請</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">09:30</span>
+                                </div>
+                                <p class="text-sm text-gray-900 dark:text-gray-100 truncate mt-1">
+                                    <span class="font-medium">Re:</span> 請確認是否參加下週的產品發布會，並回復參加人數...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-star-o"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 郵件項目 - 已讀 -->
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="2">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">人力資源部</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">昨天</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                                    關於更新員工手冊的通知，請各位同事及時查閱...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-star-o"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 郵件項目 - 已讀 -->
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="3">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">客戶服務中心</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">昨天</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                                    您的投訴已收到，我們將在24小時內給您回復...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-warning hover:text-warning/80 transition-colors">
+                                    <i class="fa fa-star"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 更多郵件 -->
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="4">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">技術支持團隊</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">06-15</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                                    關於系統升級的通知，預計將在本周末進行系統升級維護...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-star-o"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="5">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">財務部</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">06-14</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                                    關於6月份工資發放的通知，將於本月底發放...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-star-o"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 郵件詳情 (初始隱藏) -->
+            <div id="mail-detail" class="flex-1 overflow-y-auto bg-white dark:bg-gray-800 hidden">
+                <!-- 郵件標題和操作 -->
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="text-xl font-bold" id="detail-title">郵件標題</h2>
+                        <div class="flex gap-2">
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="回復">
+                                <i class="fa fa-reply text-gray-600 dark:text-gray-300"></i>
+                            </button>
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="轉發">
+                                <i class="fa fa-forward text-gray-600 dark:text-gray-300"></i>
+                            </button>
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="更多操作">
+                                <i class="fa fa-ellipsis-v text-gray-600 dark:text-gray-300"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 發件人信息 -->
+                    <div class="flex flex-wrap items-center gap-4 mb-2">
+                        <div class="flex items-center gap-2">
+                            <img src="https://picsum.photos/id/91/200" alt="發件人頭像" class="w-10 h-10 rounded-full object-cover" id="sender-avatar">
+                            <div>
+                                <p class="font-medium" id="sender-name">發件人</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="sender-time">發送時間</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:underline text-sm ml-auto">回復</button>
+                    </div>
+                </div>
+                
+                <!-- 郵件內容 -->
+                <div class="p-6" id="detail-content">
+                    <!-- 內容將通過JavaScript動態加載 -->
+                </div>
+                
+                <!-- 附件 -->
+                <div class="p-6 border-t border-gray-200 dark:border-gray-700" id="detail-attachments">
+                    <!-- 附件將通過JavaScript動態加載 -->
+                </div>
+                
+                <!-- 回復框 -->
+                <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4">回復</h3>
+                    <div class="mb-4">
+                        <textarea class="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                        bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 
+                                        focus:ring-primary/50 transition-all min-h-[150px]"
+                                  placeholder="輸入回復內容..."></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button class="btn-outline">取消</button>
+                        <button class="btn-primary">
+                            <i class="fa fa-paper-plane mr-1"></i> 發送回復
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 手機端郵件詳情頁面 (初始隱藏) -->
+    <div id="mobile-mail-detail" class="fixed inset-0 bg-white dark:bg-gray-800 z-30 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+        <!-- 頂部導航 -->
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
+            <button id="back-to-list" class="p-2">
+                <i class="fa fa-arrow-left text-gray-600 dark:text-gray-300"></i>
+            </button>
+            <h2 class="text-lg font-semibold">郵件詳情</h2>
+            <div class="flex gap-2">
+                <button class="p-2">
+                    <i class="fa fa-ellipsis-v text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 郵件內容 -->
+        <div class="p-4">
+            <h2 class="text-xl font-bold mb-4" id="mobile-detail-title">郵件標題</h2>
+            
+            <!-- 發件人信息 -->
+            <div class="flex items-center gap-3 mb-6 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <img src="https://picsum.photos/id/91/200" alt="發件人頭像" class="w-12 h-12 rounded-full object-cover" id="mobile-sender-avatar">
+                <div>
+                    <p class="font-medium" id="mobile-sender-name">發件人</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400" id="mobile-sender-time">發送時間</p>
+                </div>
+            </div>
+            
+            <!-- 郵件正文 -->
+            <div class="mb-6" id="mobile-detail-content">
+                <!-- 內容將通過JavaScript動態加載 -->
+            </div>
+            
+            <!-- 附件 -->
+            <div class="mb-6" id="mobile-detail-attachments">
+                <!-- 附件將通過JavaScript動態加載 -->
+            </div>
+            
+            <!-- 回復按鈕 -->
+            <div class="sticky bottom-0 bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
+                <button class="btn-primary w-full flex items-center justify-center gap-2">
+                    <i class="fa fa-reply"></i>
+                    <span>回復郵件</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 寫郵件彈窗 -->
+    <div id="compose-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all scale-95 opacity-0" id="modal-content">
+            <!-- 彈窗標題 -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold">寫郵件</h3>
+                <button id="close-modal" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                    <i class="fa fa-times text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+            
+            <!-- 郵件表單 -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="mb-4">
+                    <label for="to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">收件人</label>
+                    <input type="email" id="to" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                                     bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 
+                                                     focus:ring-primary/50 transition-all"
+                           placeholder="輸入收件人郵箱...">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">主題</label>
+                    <input type="text" id="subject" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                                        bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 
+                                                        focus:ring-primary/50 transition-all"
+                           placeholder="郵件主題...">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">內容</label>
+                    <textarea id="message" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                                bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 
+                                                focus:ring-primary/50 transition-all min-h-[200px]"
+                              placeholder="輸入郵件內容..."></textarea>
+                </div>
+                
+                <!-- 附件 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">附件</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                        <i class="fa fa-cloud-upload text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">拖動文件到這裡，或 <span class="text-primary font-medium">瀏覽文件</span></p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">支持 PDF, Word, Excel, 圖片等格式</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 按鈕區域 -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                <button class="btn-outline">保存草稿</button>
+                <button class="btn-primary">
+                    <i class="fa fa-paper-plane mr-1"></i> 發送
+                </button>
+            </div>
+        </div>
+    </div>
+
+
 </body>
 </html>
-
-
