@@ -10,7 +10,7 @@ function handleSearch(event) {
     "通訊": "chat.html",
     "工作": "work.html",
     "論壇": "forum.html",
-    "forum": "forum.html"
+    "forum": "forum.html",
     "ID0417": "ID0417.html"
   };
 
@@ -20,4 +20,5 @@ function handleSearch(event) {
     alert("❌ 未找到相關頁面，請嘗試其他關鍵詞。");
   }
 }
+
 
