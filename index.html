@@ -290,6 +290,29 @@
                     </div>
                     
                     <!-- 更多郵件 -->
+                    
+                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="5">
+                        <div class="flex items-start">
+                            <div class="mr-3 flex-shrink-0">
+                                <input type="checkbox" class="mt-1">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">技術支持團隊</h3>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">06-14</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                                    为提高工作效率，公司最新上线了内部智能搜索系统...
+                                </p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-star-o"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="4">
                         <div class="flex items-start">
                             <div class="mr-3 flex-shrink-0">
@@ -312,27 +335,7 @@
                         </div>
                     </div>
                     
-                    <div class="mail-item border-b border-gray-200 dark:border-gray-700 p-4 cursor-pointer mail-hover" data-id="5">
-                        <div class="flex items-start">
-                            <div class="mr-3 flex-shrink-0">
-                                <input type="checkbox" class="mt-1">
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-sm text-gray-600 dark:text-gray-400 truncate">系统管理员</h3>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">06-14</span>
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
-                                    为提高工作效率，公司最新上线了内部智能搜索系统...
-                                </p>
-                            </div>
-                            <div class="ml-2 flex-shrink-0">
-                                <button class="text-gray-400 hover:text-primary transition-colors">
-                                    <i class="fa fa-star-o"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
             
@@ -601,28 +604,10 @@
                 `,
                 attachments: ""
             },
+
             4: {
-                title: "系統升級維護通知",
-                sender: "技術支持團隊 <tech@company.com>",
-                time: "06-15 16:40",
-                avatar: "https://picsum.photos/id/177/200",
-                content: `
-                    <p class="mb-4">各位用戶：</p>
-                    <p class="mb-4">為了提供更好的服務體驗，我們計劃於本周末進行系統升級維護，具體安排如下：</p>
-                    <ul class="list-disc pl-6 mb-4 space-y-2">
-                        <li>維護時間：6月17日（周六）00:00 - 06:00</li>
-                        <li>影響範圍：所有線上服務將暫停</li>
-                        <li>升級內容：系統性能優化，安全加固，新功能上線</li>
-                    </ul>
-                    <p class="mb-4">請各位提前做好準備，由此帶來的不便，敬請諒解。</p>
-                    <p class="mb-4">如有緊急問題，請聯繫技術支持熱線：021-8888-7777。</p>
-                    <p class="mt-4 font-medium">技術支持團隊</p>
-                `,
-                attachments: ""
-            },
-            5: {
                 title: "关于公司内部搜索系统的使用说明",
-                sender: "系统管理员 <finance@company.com>",
+                sender: "技術支持團隊 <tech@company.com>",
                 time: "06-14 10:30",
                 avatar: "https://picsum.photos/id/1066/200",
                 content: `
@@ -636,10 +621,30 @@
                     </ul>
                     <p class="mb-4">如有任何使用问题，请于搜索栏输入“ID0417"联系IT支持部门黎工。</p>
                     <p class="mb-4">注意：本系统仅限公司内部使用，严禁泄露任何通过系统获取的信息给外部人员。</p>
-                    <p class="mt-4 font-medium">系统管理员</p>
+                    <p class="mt-4 font-medium">技術支持團隊</p>
                 `,
                 attachments: ""
             }
+                
+            5: {
+                title: "系統升級維護通知",
+                sender: "技術支持團隊 <tech@company.com>",
+                time: "06-03 16:40",
+                avatar: "https://picsum.photos/id/177/200",
+                content: `
+                    <p class="mb-4">各位用戶：</p>
+                    <p class="mb-4">為了提供更好的服務體驗，我們計劃於本周末進行系統升級維護，具體安排如下：</p>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>維護時間：6月7日（周六）00:00 - 06:00</li>
+                        <li>影響範圍：所有線上服務將暫停</li>
+                        <li>升級內容：系統性能優化，安全加固，新功能上線</li>
+                    </ul>
+                    <p class="mb-4">請各位提前做好準備，由此帶來的不便，敬請諒解。</p>
+                    <p class="mb-4">如有緊急問題，請聯繫技術支持熱線：021-8888-7777。</p>
+                    <p class="mt-4 font-medium">技術支持團隊</p>
+                `,
+                attachments: ""
+            },
         };
 
         // 側邊欄切換
@@ -787,4 +792,5 @@
     </script>
 </body>
 </html>
+
 
